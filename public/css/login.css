@@ -34,7 +34,7 @@ body {
   }
   
   button[type="submit"] {
-    background-color: #4CAF50;
+    background-color: #a84caf;
     border: none;
     border-radius: 5px;
     color: #fff;
@@ -43,7 +43,7 @@ body {
   }
   
   a {
-    color: #4CAF50;
+    color: #a84caf;
     text-decoration: none;
   }
   
