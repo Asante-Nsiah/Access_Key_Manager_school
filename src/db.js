@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const bcrypt = require('./controller/authCtrl');
 
     const pool = new Pool({
         user: 'postgres',
@@ -16,5 +17,7 @@ const { Pool } = require('pg');
         console.error('Error connecting to database:', err);
       });
 
-     
+
+
+
 module.exports = pool;

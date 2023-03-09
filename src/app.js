@@ -4,12 +4,13 @@ const ejs = require('ejs');
 const { dirname } = require('path');
 const path = require('path')
 const pool = require('./db');
-const bodyParser = require('body-parser');
+const bcrypt = require('./controller/authCtrl');
+
+
 
 
 const app = express();
-// app.use(bodyParser.json())
-// app.use(bodyParser.urlencoded({ extended: true }))
+
 
 
 app.use(express.json()); // Used to parse JSON bodies
@@ -27,10 +28,6 @@ app.use(express.static(path.join(__dirname, './../public')));
 
 
 
-
-app.get('/', (req, res) => {
-    res.send("I'm backend developer");
-});
 
 
 
