@@ -6,8 +6,11 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 router.get('/login', auth.login)
-router.all('/signup', auth.signup)
-// router.get('/dashboard', auth.dashboard)
+router.post('/login', auth.loginPass)
+// router.get('/signup', auth.checkAuthenticated)
+router.get('/signup', auth.signup)
+router.post('/signup', auth.signupPass)
+router.get('/dashboard', auth.dashboard)
 
 
 
