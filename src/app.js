@@ -12,6 +12,9 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
+const validator = require('validator');
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 const app = express();
 
 
@@ -42,35 +45,35 @@ app.use(express.static(path.join(__dirname, './../public')));
 
 
 
-app.get("/signup", checkAuthenticated, (req, res) => {
-    res.render("signup");
-  });
+// app.get("/signup", checkAuthenticated, (req, res) => {
+//     res.render("signup");
+//   });
   
-  app.get("/login", checkAuthenticated, (req, res) => {
-    // flash sets a messages variable. passport sets the error message
-    console.log(req.session.flash.error);
-    res.render("login");
-  });
+//   app.get("/login", checkAuthenticated, (req, res) => {
+//     // flash sets a messages variable. passport sets the error message
+//     console.log(req.session.flash.error);
+//     res.render("login");
+//   });
   
-  app.get("/dashboard", checkNotAuthenticated, (req, res) => {
-    console.log(req.isAuthenticated());
-    res.render("dashboard", { user: req.user.name });
-  });
+//   app.get("/dashboard", checkNotAuthenticated, (req, res) => {
+//     console.log(req.isAuthenticated());
+//     res.render("dashboard", { user: req.user.name });
+//   });
 
 
-  function checkAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-      return res.redirect("/dashboard");
-    }
-    next();
-  }
+//   function checkAuthenticated(req, res, next) {
+//     if (req.isAuthenticated()) {
+//       return res.redirect("/dashboard");
+//     }
+//     next();
+//   }
   
-  function checkNotAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.redirect("/login");
-  }
+//   function checkNotAuthenticated(req, res, next) {
+//     if (req.isAuthenticated()) {
+//       return next();
+//     }
+//     res.redirect("/login");
+//   }
 
 
 

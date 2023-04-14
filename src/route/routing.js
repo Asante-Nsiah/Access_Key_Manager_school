@@ -10,8 +10,10 @@ router.post('/login', auth.loginPass)
 // router.get('/signup', auth.checkAuthenticated)
 router.get('/signup', auth.signup)
 router.post('/signup', auth.signupPass)
+router.get('/verify', auth.verify)
 router.get('/dashboard', auth.dashboard)
-
+router.get('/reset-password', auth.resetPassword)
+router.post('/reset-password', auth.resetPasswordPass)
 
 
 
