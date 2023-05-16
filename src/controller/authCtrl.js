@@ -10,6 +10,11 @@ const validator = require('validator');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const req = require('express/lib/request');
+const { render } = require('ejs');
+const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
+const helmet = require('./../app.js');
+
 
 exports.signup = (req, res) => {
   res.render("signup");
@@ -85,7 +90,6 @@ console.log('find error')
 
     const insertQuery = 'INSERT INTO users (email, password, is_verified) VALUES ($1, $2, $3)';
     const insertValues = [email, password, false];
-    console.log('find error 2')
     await pool.query(insertQuery, insertValues);
     res.send('Verification email sent!');
   } catch (error) {
@@ -150,38 +154,219 @@ exports.loginPass = (passport.authenticate('local', {
 
 exports.resetPassword = (req, res) => {
   res.render("reset-password");
+
 };
 
-exports.resetPasswordPass = async (req, res) => {
-  let email = req.body.email;
-  pool.query('SELECT * FROM users WHERE email = $1', [email], (err, results) => {
-    if (err) {
-      return res.status(500).send(err);
+// Set up nodemailer transporter with your email service credentials
+const transporter = nodemailer.createTransport({
+  pool: true,
+    host: "smtp.gmail.com",
+    port: 465,
+    auth: {
+      user: 'demoproject369@gmail.com',
+      pass: 'ikuckqlhraenviig'
+    },
+    tls: {
+    
+      rejectUnauthorized: false,
+    },
+});
+
+// Generate a random token for password reset
+function generateToken() {
+  const length = 20;
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+// Store the token and email in memory for demo purposes
+const tokenMap = new Map();
+exports.forgetPassword = async (req, res) => {
+  const { email } = req.body;
+  // Check if email exists in your user database
+  // If it does, generate a token and send a password reset email
+  // with a link that includes the token in the URL
+  try {
+    const user = await authModel.findEmail({ email });
+    console.log(`email:${email}`)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    if (!results.length) {
-      return res.status(404).send('User not found');
-    }
-    // Check if the current password is correct
-    bcrypt.compare(currentPassword, results[0].password, (err, result) => {
-      if (err) {
-        return res.status(500).send(err);
+    const token = generateToken();
+    tokenMap.set(token, email);
+    const mailOptions = {
+      from: 'demoproject369@gmail.com',
+      to: email,
+      subject: 'Password reset request',
+      text: `Click the following link to reset your password: http://localhost:3000/reset-actual-password/${token}`
+    };
+
+   
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Error sending email' });
       }
-      if (!result) {
-        return res.status(401).send('Current password is incorrect');
-      }
-      // Hash the new password and update the user's password in the database
-      bcrypt.hash(newPassword, saltRounds, (err, hash) => {
+      console.log('Email sent: ' + info.response);
+      res.status(200).json({ message: 'Password reset email sent' });
+      pool.query('UPDATE users SET resetLink = $1 WHERE email = $2', [token, email], (err, result) => {
         if (err) {
-          return res.status(500).send(err);
+          console.log(err);
+          return res.status(400).json({ message: 'Reset password link error' });
         }
-        pool.query('UPDATE users SET password = ? WHERE email = ?', [hash, email], (err) => {
-          if (err) {
-            return res.status(500).send(err);
-          }
-          return res.status(200).send('Password updated successfully');
-        });
+        console.log('Reset password link updated successfully');
       });
     });
-  });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+  
+    
 };
+
+exports.resetActualPassword = (req, res) => {
+  res.render('reset-actual-password');
+
  
+};
+exports.resetActualPasswordPass = async (req, res) => {
+  const  resetLink  = req.params.token
+  try {
+   
+    console.log(resetLink);
+    
+    if (!resetLink) {
+      return res.status(400).json({ message: 'Reset link is missing or invalid' });
+    }
+
+    const resetData = await authModel.findResetData(resetLink);
+    console.log(resetData);
+    if (!resetData) {
+      return res.status(404).json({ message: 'Invalid or expired token' });
+    }
+    
+    const email = resetData.email;
+    const user = await authModel.findEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // res.render('/reset-actual-password');
+    const { newpassword, confirmpassword } = req.body;
+    const errors = [];
+
+    if (!newpassword || !confirmpassword) {
+      errors.push({ message: 'Please fill all fields' });
+    }
+
+    if (newpassword && newpassword.length < 6) {
+      errors.push({ message: 'Password must be at least 6 characters long' });
+    }
+
+    if (newpassword !== confirmpassword) {
+      errors.push({ message: 'Passwords do not match' });
+    }
+
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+    await authModel.updatePassword(email, hashedPassword);
+    await authModel.deleteResetData(resetLink);
+
+    req.flash('success_msg', 'Your password has been reset. Please log in.');
+    res.redirect('/login');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+ 
+
+
+
+// exports.admin = (req, res) => {
+//   res.render('adminsPage');
+//   keys = async (req, res) => {
+//     const client = await pool.connect();
+//     try {
+//       const result = await client.query('SELECT key_id, key_value, created_at, expires_at, revoked_at FROM keys');
+//       res.send(result.rows);
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).send({ message: 'Error getting keys' });
+//     } finally {
+//       client.release();
+//     }
+//   };
+
+//   const fetchKeys = async () => {
+//     try {
+//       const response = await fetch('/keys');
+//       const data = await response.json();
+//       return data;
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   };
+  
+//   const populateTable = async () => {
+//     const keys = await fetchKeys();
+  
+//     const dom = new JSDOM(`<!DOCTYPE html><html><body><table id="key-list"><tbody></tbody></table></body></html>`);
+//     const document = dom.window.document;
+  
+//     const tableBody = document.querySelector('#key-list tbody');
+  
+//     if (Array.isArray(keys)) {
+//       keys.forEach((key) => {
+//         const row = document.createElement('tr');
+  
+//         const keyCell = document.createElement('td');
+//         keyCell.textContent = key.key;
+//         row.appendChild(keyCell);
+  
+//         const userCell = document.createElement('td');
+//         userCell.textContent = key.user_email;
+//         row.appendChild(userCell);
+  
+//         const statusCell = document.createElement('td');
+//         statusCell.textContent = key.status;
+  
+//         if (key.status === 'active') {
+//           statusCell.classList.add('active');
+//         } else if (key.status === 'expired') {
+//           statusCell.classList.add('expired');
+//         } else if (key.status === 'revoked') {
+//           statusCell.classList.add('revoked');
+//         }
+  
+//         row.appendChild(statusCell);
+  
+//         const procurementCell = document.createElement('td');
+//         procurementCell.textContent = key.procurement_date;
+//         row.appendChild(procurementCell);
+  
+//         const expiryCell = document.createElement('td');
+//         expiryCell.textContent = key.expiry_date;
+//         row.appendChild(expiryCell);
+  
+//         tableBody.appendChild(row);
+//       });
+//     } else {
+//       console.error('Keys data is not an array');
+//     }
+  
+//     console.log(dom.serialize());
+//   };
+  
+//   populateTable();
+// };
+
+

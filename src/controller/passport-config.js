@@ -2,9 +2,8 @@ const { authenticate } = require("passport")
 
 const LocalStrategy = require("passport-local").Strategy
 const bcrypt = require("bcrypt")
-const dotenv = require('dotenv').config({path:'./env'});
 const pool = require("./../db");
-const Sequelize = require("sequelize");
+
 
 
 

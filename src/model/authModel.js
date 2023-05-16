@@ -1,32 +1,4 @@
-// pool.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-//   if (err) {
-//     return res.status(500).send(err);
-//   }
-//   if (!results.length) {
-//     return res.status(404).send('User not found');
-//   }
-//   // Check if the current password is correct
-//   bcrypt.compare(currentPassword, results[0].password, (err, result) => {
-//     if (err) {
-//       return res.status(500).send(err);
-//     }
-//     if (!result) {
-//       return res.status(401).send('Current password is incorrect');
-//     }
-//     // Hash the new password and update the user's password in the database
-//     bcrypt.hash(newPassword, saltRounds, (err, hash) => {
-//       if (err) {
-//         return res.status(500).send(err);
-//       }
-//       pool.query('UPDATE users SET password = ? WHERE email = ?', [hash, email], (err) => {
-//         if (err) {
-//           return res.status(500).send(err);
-//         }
-//         return res.status(200).send('Password updated successfully');
-//       });
-//     });
-//   });
-// });
+
 const pool = require("./../db")
 
 exports.findEmail = async (email) => {
@@ -40,5 +12,35 @@ exports.createUser = async (email, hashedPassword) => {
     let result = await pool.query(sql , [email, hashedPassword] )
     return result
 }
+exports.updatePassword = async (email, hashedPassword) => {
+    let sql = `UPDATE users SET password = $1 WHERE email = $2`;
+    let result = await pool.query(sql , [hashedPassword, email] )
+    return result
+}
+exports.updateUser = async (email, hashedPassword) => {
+    let sql = `UPDATE users SET password = $1 WHERE email = $2`;
+    let result = await pool.query(sql , [hashedPassword, email] )
+    return result
+}
 
- 
+// exports.findResetData = async (resetLink) => {
+//     let sql = `SELECT * FROM users WHERE resetlink = $1`;
+//     let result = await pool.query(sql, [resetLink]);
+//     return result.rows[0];
+//   };
+  
+  exports.deleteResetData = async (resetLink) => {
+    let sql = `DELETE FROM reset_data WHERE resetlink = $1`;
+    await pool.query(sql, [resetLink]);
+  };
+
+  exports.findResetData = async (resetLink) => {
+    try {
+      let sql = `SELECT * FROM users WHERE resetlink = $1`;
+      let result = await pool.query(sql, [resetLink]);
+      return result.rows[0];
+    } catch (error) {
+      console.error(error);
+      throw new Error('Error finding reset data');
+    }
+  };
