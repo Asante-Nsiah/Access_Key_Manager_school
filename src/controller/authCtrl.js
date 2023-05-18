@@ -145,12 +145,32 @@ exports.login = async (req, res) => {
   res.render("login");
 
 }
+exports.loginPass = (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
 
-exports.loginPass = (passport.authenticate('local', {
-  successRedirect: '/dashboard',
-  failureRedirect: '/login',
-  failureFlash: true,
-}))
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Check if the email matches the admin email
+    if (user.email === 'demoproject369@gmail.com') {
+      // Redirect to the admin page
+      return res.redirect('/adminsPage');
+    }
+
+    // Redirect to the dashboard
+    return res.redirect('/dashboard');
+  })(req, res, next);
+};
+// exports.loginPass = (passport.authenticate('local', {
+//   successRedirect: '/dashboard',
+//   failureRedirect: '/login',
+//   failureFlash: true,
+// }))
 
 exports.resetPassword = (req, res) => {
   res.render("reset-password");
@@ -230,17 +250,18 @@ exports.forgetPassword = async (req, res) => {
 };
 
 exports.resetActualPassword = (req, res) => {
-  res.render('reset-actual-password');
+  const { token } = req.query;
+  res.render('reset-actual-password', {token});
 
  
 };
 exports.resetActualPasswordPass = async (req, res) => {
-  const  resetLink  = req.params.token
+  const { token, newpassword, confirmpassword } = req.body;
   try {
    
-    console.log(resetLink);
+    console.log(token);
     
-    if (!resetLink) {
+    if (!token) {
       return res.status(400).json({ message: 'Reset link is missing or invalid' });
     }
 
@@ -256,7 +277,7 @@ exports.resetActualPasswordPass = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     // res.render('/reset-actual-password');
-    const { newpassword, confirmpassword } = req.body;
+    // const { newpassword, confirmpassword } = req.body;
     const errors = [];
 
     if (!newpassword || !confirmpassword) {
@@ -288,24 +309,29 @@ exports.resetActualPasswordPass = async (req, res) => {
 };
 
  
+exports.adminLogin = (req, res) => {
+  
+};
+exports.adminRegister = async (req, res) => {
+  
+};
 
 
-
-// exports.admin = (req, res) => {
-//   res.render('adminsPage');
-//   keys = async (req, res) => {
-//     const client = await pool.connect();
-//     try {
-//       const result = await client.query('SELECT key_id, key_value, created_at, expires_at, revoked_at FROM keys');
-//       res.send(result.rows);
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).send({ message: 'Error getting keys' });
-//     } finally {
-//       client.release();
-//     }
-//   };
-
+exports.admin = (req, res) => {
+  res.render('adminsPage');
+  keys = async (req, res) => {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT key_id, key_value, created_at, expires_at, revoked_at FROM keys');
+      res.send(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ message: 'Error getting keys' });
+    } finally {
+      client.release();
+    }
+  };
+};
 //   const fetchKeys = async () => {
 //     try {
 //       const response = await fetch('/keys');

@@ -15,10 +15,11 @@ router.get('/verify', auth.verify)
 router.get('/dashboard', auth.dashboard)
 router.get('/reset-password', auth.resetPassword)
 router.post('/reset-password', auth.forgetPassword)
-router.post('/reset-actual-password/:token', auth.resetActualPassword)
-router.post('/reset-actual-password/:token', auth.resetActualPasswordPass);
-// router.get('/adminsPage', auth.admin)
+router.get('/reset-actual-password/:token', auth.resetActualPassword)
+router.post('reset-actual-password/:token', auth.resetActualPasswordPass)
 
-
+router.get('/adminsPage', auth.admin)
+// router.post('/admin/login', auth.adminLogin)
+// router.post('/admin/register', auth.adminRegister)
 
 module.exports = router;
