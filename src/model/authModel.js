@@ -1,5 +1,6 @@
 
 const pool = require("./../db")
+const { v4: uuidv4 } = require('uuid');
 
 exports.findEmail = async (email) => {
     let sql = `SELECT * FROM users WHERE email =$1`;
@@ -7,11 +8,14 @@ exports.findEmail = async (email) => {
     return result
 }
 
-exports.createUser = async (email, hashedPassword) => {
-    let sql = `INSERT INTO users (email, password) VALUES ($1, $2)`;
-    let result = await pool.query(sql , [email, hashedPassword] )
+exports.createUser = async (email, hashedPassword, access_keys) => {
+ 
+    let sql = `INSERT INTO users (email, password, access_keys) VALUES ($1, $2, $3)`;
+    let result = await pool.query(sql , [email, hashedPassword, access_keys] )
+    console.log(access_keys);
     return result
 }
+
 exports.updatePassword = async (email, hashedPassword) => {
     let sql = `UPDATE users SET password = $1 WHERE email = $2`;
     let result = await pool.query(sql , [hashedPassword, email] )

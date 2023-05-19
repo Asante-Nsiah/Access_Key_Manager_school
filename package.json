@@ -25,6 +25,7 @@
     "passport-local": "^1.0.0",
     "pg": "^8.10.0",
     "sequelize": "^6.29.3",
+    "uuid": "^9.0.0",
     "validator": "^13.9.0"
   },
   "devDependencies": {

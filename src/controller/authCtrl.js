@@ -14,6 +14,7 @@ const { render } = require('ejs');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const helmet = require('./../app.js');
+const { v4: uuidv4 } = require('uuid');
 
 
 exports.signup = (req, res) => {
@@ -25,6 +26,7 @@ exports.signup = (req, res) => {
 exports.signupPass = async (req, res) => {
   try{
     let { email, password, password2 } = req.body;
+    const access_keys = uuidv4(); // Generate a unique key
 console.log(req.body)
   if (!validator.isEmail(email)){
     return res.status(400).send('Invalid email address');
@@ -53,11 +55,13 @@ console.log(hashedPassword);
     return res.render("signup", {message: "Email already registered"});
   }
 
-  let createdUser = await authModel.createUser(email, hashedPassword)
+  let createdUser = await authModel.createUser(email, hashedPassword, access_keys)
   if(createdUser.rows){
     req.flash("success_msg", "You have registered successfully. Kindly log in");
     res.redirect("/login");
   }
+  
+
   // Generate verification token
   const token = jwt.sign({ email }, 'secret', { expiresIn: '1h' });
   console.log(`This is the token :${token}`);
@@ -352,69 +356,5 @@ exports.accessKeys = async (req, res) => {
   }
 };
 
-
-
-//   const fetchKeys = async () => {
-//     try {
-//       const response = await fetch('/keys');
-//       const data = await response.json();
-//       return data;
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
-  
-//   const populateTable = async () => {
-//     const keys = await fetchKeys();
-  
-//     const dom = new JSDOM(`<!DOCTYPE html><html><body><table id="key-list"><tbody></tbody></table></body></html>`);
-//     const document = dom.window.document;
-  
-//     const tableBody = document.querySelector('#key-list tbody');
-  
-//     if (Array.isArray(keys)) {
-//       keys.forEach((key) => {
-//         const row = document.createElement('tr');
-  
-//         const keyCell = document.createElement('td');
-//         keyCell.textContent = key.key;
-//         row.appendChild(keyCell);
-  
-//         const userCell = document.createElement('td');
-//         userCell.textContent = key.user_email;
-//         row.appendChild(userCell);
-  
-//         const statusCell = document.createElement('td');
-//         statusCell.textContent = key.status;
-  
-//         if (key.status === 'active') {
-//           statusCell.classList.add('active');
-//         } else if (key.status === 'expired') {
-//           statusCell.classList.add('expired');
-//         } else if (key.status === 'revoked') {
-//           statusCell.classList.add('revoked');
-//         }
-  
-//         row.appendChild(statusCell);
-  
-//         const procurementCell = document.createElement('td');
-//         procurementCell.textContent = key.procurement_date;
-//         row.appendChild(procurementCell);
-  
-//         const expiryCell = document.createElement('td');
-//         expiryCell.textContent = key.expiry_date;
-//         row.appendChild(expiryCell);
-  
-//         tableBody.appendChild(row);
-//       });
-//     } else {
-//       console.error('Keys data is not an array');
-//     }
-  
-//     console.log(dom.serialize());
-//   };
-  
-//   populateTable();
-// };
 
 

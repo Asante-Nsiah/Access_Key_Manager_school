@@ -21,11 +21,11 @@
   <tbody>
     <% accessKeys.forEach(accessKey => { %>
     <tr>
+      <td><%= accessKey.user_email %></td>
       <td><%= accessKey.key %></td>
       <td><%= accessKey.date_of_procurement %></td>
       <td><%= accessKey.expiry_date %></td>
       <td><%= accessKey.status %></td>
-      <td><%= accessKey.user_email %></td>
     </tr>
     <% }); %>
   </tbody>
