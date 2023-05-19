@@ -308,13 +308,7 @@ exports.resetActualPasswordPass = async (req, res) => {
   }
 };
 
- 
-exports.adminLogin = (req, res) => {
-  
-};
-exports.adminRegister = async (req, res) => {
-  
-};
+
 
 
 exports.admin = (req, res) => {
@@ -332,6 +326,34 @@ exports.admin = (req, res) => {
     }
   };
 };
+
+exports.users = async (req, res) => {
+  try {
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    const users = result.rows;
+
+    res.render('users', { users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+exports.accessKeys = async (req, res) => {
+  try {
+    const query = 'SELECT * FROM access_keys';
+    const result = await pool.query(query);
+    const accessKeys = result.rows;
+
+    res.render('accessKeys', { accessKeys });
+  } catch (error) {
+    console.error('Error fetching access_keys:', error);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
+
 //   const fetchKeys = async () => {
 //     try {
 //       const response = await fetch('/keys');

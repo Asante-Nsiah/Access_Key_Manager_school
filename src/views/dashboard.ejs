@@ -8,10 +8,12 @@
 	<div class="container">
 		<h1>User Dashboard</h1>
 		<div class="user">
-			<h2>User 1</h2>
-			<p>Name: John Smith</p>
-			<p>Age: 30</p>
-			<p>Email: john.smith@example.com</p>
+			<h1>User List</h1>
+    <ul>
+      <% users.forEach(user => { %>
+      <li><%= user.email %></li>
+      <% }); %>
+    </ul>
 		</div>
 		<div class="user">
 			<h2>User 2</h2>

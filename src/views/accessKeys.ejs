@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access keys List</title>
+</head>
+<body>
+    <h1>Access Keys List</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Date of Procurement</th>
+      <th>Expiry Date</th>
+      <th>Status</th>
+      <th>User Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% accessKeys.forEach(accessKey => { %>
+    <tr>
+      <td><%= accessKey.key %></td>
+      <td><%= accessKey.date_of_procurement %></td>
+      <td><%= accessKey.expiry_date %></td>
+      <td><%= accessKey.status %></td>
+      <td><%= accessKey.user_email %></td>
+    </tr>
+    <% }); %>
+  </tbody>
+</table>
+</body>
+</html>

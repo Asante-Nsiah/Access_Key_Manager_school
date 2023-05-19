@@ -19,7 +19,7 @@ router.get('/reset-actual-password/:token', auth.resetActualPassword)
 router.post('reset-actual-password/:token', auth.resetActualPasswordPass)
 
 router.get('/adminsPage', auth.admin)
-// router.post('/admin/login', auth.adminLogin)
-// router.post('/admin/register', auth.adminRegister)
+router.get('/users', auth.users)
+router.get('/accessKeys', auth.accessKeys)
 
 module.exports = router;
