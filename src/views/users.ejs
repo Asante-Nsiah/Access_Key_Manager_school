@@ -15,6 +15,8 @@
             <th>Email</th>
             <th>Is Verified</th>
             <th>Access Keys</th>
+            <th>Date of Procurement</th>
+            <th>Expiry Date</th>
           </tr>
         </thead>
         <tbody>
@@ -24,9 +26,12 @@
             <td><%= user.email %></td>
             <td><%= user.is_verified %></td>
             <td><%= user.access_keys %></td>
+            <td><%= user.date_of_procurement %></td>
+            <td><%= user.expiry_date %></td>
           </tr>
           <% }); %>
         </tbody>
       </table>
+
 </body>
 </html>

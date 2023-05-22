@@ -5,16 +5,36 @@
 	<link rel="stylesheet" type="text/css" href="/public/css/dasboard.css">
 </head>
 <body>
-	<!-- <div class="container">
-		<h1>User Dashboard</h1>
-		<div class="user">
-			<h1>User List</h1>
-    <ul>
-      <% users.forEach(user => { %>
-      <li><%= user.email %></li>
-      <% }); %>
-    </ul>
-		</div>
-		 -->
+	
+	<% const userData = users; %>
+	<% userData.filter(user => user.email === currentUserEmail).forEach(user => { %>
+		<%= 'Welcome ' + user.email %>
+	
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Email</th>
+					<th>Is Verified</th>
+					<th>Access Keys</th>
+					<th>Status</th>
+					<th>Date of Procurement</th>
+					<th>Expiry Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><%= user.id %></td>
+					<td><%= user.email %></td>
+					<td><%= user.is_verified %></td>
+					<td><%= user.access_keys %></td>
+					<td><%= user.status %></td>
+					<td><%= user.date_of_procurement %></td>
+					<td><%= user.expiry_date %></td>
+				</tr>
+			</tbody>
+		</table>
+	<% }); %>
+	
 </body>
 </html>

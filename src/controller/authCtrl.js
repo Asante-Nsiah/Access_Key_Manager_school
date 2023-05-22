@@ -26,7 +26,17 @@ exports.signup = (req, res) => {
 exports.signupPass = async (req, res) => {
   try{
     let { email, password, password2 } = req.body;
-    const access_keys = uuidv4(); // Generate a unique key
+   
+
+    // Function to generate access key, generation date, and expiry date
+const generateAccessKey = () => {
+  const access_keys = uuidv4(); // Generate a unique key
+     // Create generation and expiry dates
+     const generationDate = new Date();
+     const expiryDate = new Date();
+     expiryDate.setFullYear(generationDate.getFullYear() + 1);
+     return { access_keys, generationDate, expiryDate };
+}; 
 console.log(req.body)
   if (!validator.isEmail(email)){
     return res.status(400).send('Invalid email address');
@@ -54,8 +64,8 @@ console.log(hashedPassword);
     console.log('email exists');
     return res.render("signup", {message: "Email already registered"});
   }
-
-  let createdUser = await authModel.createUser(email, hashedPassword, access_keys)
+  const { access_keys, generationDate, expiryDate } = generateAccessKey();
+  let createdUser = await authModel.createUser(email, hashedPassword, access_keys, generationDate, expiryDate)
   if(createdUser.rows){
     req.flash("success_msg", "You have registered successfully. Kindly log in");
     res.redirect("/login");
@@ -142,15 +152,13 @@ exports.verify = async (req, res) => {
     res.status(400).send('Invalid or expired verification token');
   }
 };
-exports.dashboard = (req, res) => {
-  res.render("dashboard")
-};
+
 exports.login = async (req, res) => {
   res.render("login");
 
 }
 exports.loginPass = (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
+  const authenticatedUser = passport.authenticate('local', (err, user, info) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ message: 'Internal server error' });
@@ -159,6 +167,10 @@ exports.loginPass = (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    req.session.user = {
+      email: user.email,
+    };
 
     // Check if the email matches the admin email
     if (user.email === 'demoproject369@gmail.com') {
@@ -175,6 +187,28 @@ exports.loginPass = (req, res, next) => {
 //   failureRedirect: '/login',
 //   failureFlash: true,
 // }))
+
+exports.dashboard = async (req, res) => {
+  
+  if (req.session.user && req.session.user.email) {
+    const currentUserEmail = req.session.user.email;
+
+  try {
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    const users = result.rows;
+
+    
+    res.render('dashboard', { users, currentUserEmail });
+  
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Internal Server Error');
+  }
+  } else {
+    res.redirect('/login');
+  }
+};
 
 exports.resetPassword = (req, res) => {
   res.render("reset-password");
@@ -315,20 +349,25 @@ exports.resetActualPasswordPass = async (req, res) => {
 
 
 
-exports.admin = (req, res) => {
-  res.render('adminsPage');
-  keys = async (req, res) => {
-    const client = await pool.connect();
-    try {
-      const result = await client.query('SELECT key_id, key_value, created_at, expires_at, revoked_at FROM keys');
-      res.send(result.rows);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send({ message: 'Error getting keys' });
-    } finally {
-      client.release();
-    }
-  };
+exports.admin = async (req, res) => {
+  if (req.session.user && req.session.user.email) {
+    const currentUserEmail = req.session.user.email;
+
+  try {
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    const users = result.rows;
+
+    
+    res.render('adminsPage', { users, currentUserEmail });
+  
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Internal Server Error');
+  }
+  } else {
+    res.redirect('/login');
+  }
 };
 
 exports.users = async (req, res) => {
@@ -337,7 +376,9 @@ exports.users = async (req, res) => {
     const result = await pool.query(query);
     const users = result.rows;
 
+    
     res.render('users', { users });
+  
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).send('Internal Server Error');

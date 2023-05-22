@@ -8,10 +8,10 @@ exports.findEmail = async (email) => {
     return result
 }
 
-exports.createUser = async (email, hashedPassword, access_keys) => {
+exports.createUser = async (email, hashedPassword, access_keys, generationDate, expiryDate) => {
  
-    let sql = `INSERT INTO users (email, password, access_keys) VALUES ($1, $2, $3)`;
-    let result = await pool.query(sql , [email, hashedPassword, access_keys] )
+    let sql = `INSERT INTO users (email, password, access_keys, date_of_procurement, expiry_date) VALUES ($1, $2, $3, $4, $5)`;
+    let result = await pool.query(sql , [email, hashedPassword, access_keys, generationDate, expiryDate] )
     console.log(access_keys);
     return result
 }

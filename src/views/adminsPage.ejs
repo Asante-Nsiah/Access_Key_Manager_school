@@ -8,44 +8,38 @@
     <link rel="stylesheet" href="/css/adminsPage.css">
 </head>
 <body>
-  <h1>User List</h1>
-  <h1>User List</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>Keys</th>
-          <th>Email</th>
-          <th>Status</th>
-          <th>Procurement Date</th>
-          <th>Expiry Date</th>
-        </tr>
-      </thead>
-      <tbody>
+  <h1>Admin's Page</h1>
+  <% const userData = users; %>
+	<% userData.filter(user => user.email === currentUserEmail).forEach(user => { %>
+		<%= 'Welcome ' + user.email %>
+    <br>
+    <br>
+		<table>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Email</th>
+					<th>Is Verified</th>
+					<th>Access Keys</th>
+					<th>Status</th>
+					<th>Date of Procurement</th>
+					<th>Expiry Date</th>
+				</tr>
+			</thead>
+			<tbody>
         <% users.forEach(user => { %>
-        <tr>
-          <td>
-            <% if (user.access_keys && user.access_keys.length > 0) { %>
-              <% user.access_keys.forEach(accessKey => { %>
-                <%= accessKey.key %><br>
-              <% }); %>
-            <% } else { %>
-              No keys found
-            <% } %>
-          </td>
-          <td><%= user.email %></td>
-          
-          <td>
-            <% if (user.access_keys && user.access_keys.length > 0) { %>
-              <% user.access_keys.forEach(accessKey => { %>
-                <%= accessKey.expiry_date %><br>
-              <% }); %>
-            <% } else { %>
-              -
-            <% } %>
-          </td>
-        </tr>
+				<tr>
+					<td><%= user.id %></td>
+					<td><%= user.email %></td>
+					<td><%= user.is_verified %></td>
+					<td><%= user.access_keys %></td>
+					<td><%= user.status %></td>
+					<td><%= user.date_of_procurement %></td>
+					<td><%= user.expiry_date %></td>
+				</tr>
         <% }); %>
-      </tbody>
-    </table>
+			</tbody>
+		</table>
+	<% }); %>
 </body>
 </html>
