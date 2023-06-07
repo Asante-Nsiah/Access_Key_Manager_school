@@ -8,27 +8,36 @@
 </head>
 <body>
     <h1>Access Keys List</h1>
-<table>
-  <thead>
-    <tr>
-      <th>Key</th>
-      <th>Date of Procurement</th>
-      <th>Expiry Date</th>
-      <th>Status</th>
-      <th>User Email</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% accessKeys.forEach(accessKey => { %>
-    <tr>
-      <td><%= accessKey.user_email %></td>
-      <td><%= accessKey.key %></td>
-      <td><%= accessKey.date_of_procurement %></td>
-      <td><%= accessKey.expiry_date %></td>
-      <td><%= accessKey.status %></td>
-    </tr>
-    <% }); %>
-  </tbody>
-</table>
+  
+   
+      <br>
+      <br>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Is Verified</th>
+            <th>Access Keys</th>
+            <th>Status</th>
+            <th>Date of Procurement</th>
+            <th>Expiry Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% accessKeys.forEach( accessKey => { %>
+          <tr>
+            <td><%= accessKey.id %></td>
+            <td><%= accessKey.email %></td>
+            <td><%= accessKey.is_verified %></td>
+            <td><%= accessKey.access_keys %></td>
+            <td><%= accessKey.status %></td>
+            <td><%= accessKey.date_of_procurement %></td>
+            <td><%= accessKey.expiry_date %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+  
 </body>
 </html>

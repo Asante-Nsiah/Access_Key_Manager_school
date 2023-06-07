@@ -35,7 +35,10 @@ const generateAccessKey = () => {
      const generationDate = new Date();
      const expiryDate = new Date();
      expiryDate.setFullYear(generationDate.getFullYear() + 1);
-     return { access_keys, generationDate, expiryDate };
+
+    const status = expiryDate > new Date() ? 'Active' : 'Expired';
+
+     return { access_keys, generationDate, expiryDate, status };
 }; 
 console.log(req.body)
   if (!validator.isEmail(email)){
@@ -64,8 +67,8 @@ console.log(hashedPassword);
     console.log('email exists');
     return res.render("signup", {message: "Email already registered"});
   }
-  const { access_keys, generationDate, expiryDate } = generateAccessKey();
-  let createdUser = await authModel.createUser(email, hashedPassword, access_keys, generationDate, expiryDate)
+  const { access_keys, generationDate, expiryDate, status } = generateAccessKey();
+  let createdUser = await authModel.createUser(email, hashedPassword, access_keys, generationDate, expiryDate, status)
   if(createdUser.rows){
     req.flash("success_msg", "You have registered successfully. Kindly log in");
     res.redirect("/login");
@@ -294,56 +297,39 @@ exports.resetActualPassword = (req, res) => {
  
 };
 exports.resetActualPasswordPass = async (req, res) => {
-  const { token, newpassword, confirmpassword } = req.body;
+  const { token, password, confirmPassword } = req.body;
+console.log(token);
   try {
-   
-    console.log(token);
-    
-    if (!token) {
-      return res.status(400).json({ message: 'Reset link is missing or invalid' });
+    // Check if the token exists in the tokenMap
+    if (!tokenMap.has(token)) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
     }
 
-    const resetData = await authModel.findResetData(resetLink);
-    console.log(resetData);
-    if (!resetData) {
-      return res.status(404).json({ message: 'Invalid or expired token' });
-    }
-    
-    const email = resetData.email;
-    const user = await authModel.findEmail(email);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    // res.render('/reset-actual-password');
-    // const { newpassword, confirmpassword } = req.body;
-    const errors = [];
+    const email = tokenMap.get(token);
 
-    if (!newpassword || !confirmpassword) {
-      errors.push({ message: 'Please fill all fields' });
+    // Check if the passwords match
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
     }
 
-    if (newpassword && newpassword.length < 6) {
-      errors.push({ message: 'Password must be at least 6 characters long' });
-    }
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (newpassword !== confirmpassword) {
-      errors.push({ message: 'Passwords do not match' });
-    }
+    // Update the user's password in the database
+    const updateQuery = 'UPDATE users SET password = $1 WHERE email = $2';
+    const updateValues = [hashedPassword, email];
 
-    if (errors.length > 0) {
-      return res.status(400).json({ errors });
-    }
+    await pool.query(updateQuery, updateValues);
 
-    const hashedPassword = await bcrypt.hash(newpassword, 10);
-    await authModel.updatePassword(email, hashedPassword);
-    await authModel.deleteResetData(resetLink);
+    // Remove the token from the tokenMap
+    tokenMap.delete(token);
 
-    req.flash('success_msg', 'Your password has been reset. Please log in.');
-    res.redirect('/login');
+    res.status(200).json({ message: 'Password reset successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
+   
 };
 
 
@@ -385,8 +371,9 @@ exports.users = async (req, res) => {
   }
 };
 exports.accessKeys = async (req, res) => {
+  
   try {
-    const query = 'SELECT * FROM access_keys';
+    const query = 'SELECT * FROM users';
     const result = await pool.query(query);
     const accessKeys = result.rows;
 
@@ -397,5 +384,18 @@ exports.accessKeys = async (req, res) => {
   }
 };
 
+exports.keyRevoke = async (req, res) => {
+  const accessKey = req.params.accessKey;
+
+  try {
+    const query = 'UPDATE access_keys SET status = $1 WHERE access_key = $2';
+    await pool.query(query, ['revoked', accessKey]);
+
+    res.status(200).json({ message: 'Access key revoked successfully' });
+  } catch (error) {
+    console.error('Error occurred:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}; 
 
 

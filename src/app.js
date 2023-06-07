@@ -1,4 +1,5 @@
 
+require('dotenv').config();
 
 const express = require('express');
 const routes = require('./route/routing');
@@ -15,6 +16,7 @@ const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const app = express();
+const port = process.env.PORT || 3000;
 
 
 const initializePassport = require('./controller/passport-config');
@@ -47,6 +49,6 @@ app.use(express.static(path.join(__dirname, './../public')));
 
 
 
-app.listen(3000, () => {
+app.listen(port, () => {
     console.log('App listening on port 3000!');
 });
