@@ -8,38 +8,50 @@
     <link rel="stylesheet" href="/css/adminsPage.css">
 </head>
 <body>
-  <h1>Admin's Page</h1>
-  <% const userData = users; %>
-	<% userData.filter(user => user.email === currentUserEmail).forEach(user => { %>
-		<%= 'Welcome ' + user.email %>
-    <br>
-    <br>
-		<table>
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Email</th>
-					<th>Is Verified</th>
-					<th>Access Keys</th>
-					<th>Status</th>
-					<th>Date of Procurement</th>
-					<th>Expiry Date</th>
-				</tr>
-			</thead>
-			<tbody>
-        <% users.forEach(user => { %>
-				<tr>
-					<td><%= user.id %></td>
-					<td><%= user.email %></td>
-					<td><%= user.is_verified %></td>
-					<td><%= user.access_keys %></td>
-					<td><%= user.status %></td>
-					<td><%= user.date_of_procurement %></td>
-					<td><%= user.expiry_date %></td>
-				</tr>
-        <% }); %>
-			</tbody>
-		</table>
-	<% }); %>
+	<h1>Admin's Page</h1>
+<% const userData = users; %>
+<% userData.filter(user => user.email === currentUserEmail).forEach(user => { %>
+  <%= 'Welcome ' + user.email %>
+  <br>
+  <br>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Is Verified</th>
+        <th>Access Keys</th>
+        <th>Status</th>
+        <th>Date of Procurement</th>
+        <th>Expiry Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+      <tr>
+        <td><%= user.id %></td>
+        <td><%= user.email %></td>
+        <td><%= user.is_verified %></td>
+        <td><%= user.access_keys %></td>
+        <td>
+			<form action="/users/<%= user.id %>/status" method="PUT">
+				<select class="status-dropdown" name="status" data-userid="<%= user.id %>">
+				  <option value="active" <% if (user.status === 'active') { %>selected<% } %>>Active</option>
+				  <option value="revoked" <% if (user.status === 'revoked') { %>selected<% } %>>Revoked</option>
+				</select>
+				<button type="submit">Submit</button>
+			  </form>
+        </td>
+        <td><%= user.date_of_procurement %></td>
+        <td><%= user.expiry_date %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+<% }); %>
+
+	
+
+
 </body>
 </html>

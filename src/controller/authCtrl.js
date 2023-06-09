@@ -17,6 +17,7 @@ const helmet = require('./../app.js');
 const { v4: uuidv4 } = require('uuid');
 
 
+
 exports.signup = (req, res) => {
   res.render("signup");
 }
@@ -384,14 +385,53 @@ exports.accessKeys = async (req, res) => {
   }
 };
 
-exports.keyRevoke = async (req, res) => {
-  const accessKey = req.params.accessKey;
+exports.getKeyRevoke = async (req, res) => {
+  
+  if (req.session.user && req.session.user.email) {
+    const currentUserEmail = req.session.user.email;
 
   try {
-    const query = 'UPDATE access_keys SET status = $1 WHERE access_key = $2';
-    await pool.query(query, ['revoked', accessKey]);
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    const users = result.rows;
 
-    res.status(200).json({ message: 'Access key revoked successfully' });
+    
+    res.render('status', { users, currentUserEmail });
+  
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Internal Server Error');
+  }
+  } else {
+    res.redirect('/adminsPage');
+  }
+
+};
+exports.keyRevoke = async (req, res) => {
+  const userId = req.params.id;
+  
+  try {
+    // Check if the user with the given ID exists
+    const checkQuery = 'SELECT * FROM users WHERE id = $1';
+    const checkResult = await pool.query(checkQuery, [userId]);
+
+    if (checkResult.rows.length === 0) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Get the current status of the user
+    const user = checkResult.rows[0];
+    const currentStatus = user.status;
+
+    // Determine the new status based on the current status
+    const newStatus = (currentStatus === 'Active') ? 'Revoked' : 'Active';
+
+    // Update the status in the database
+    const updateQuery = 'UPDATE users SET status = $1 WHERE id = $2';
+    await pool.query(updateQuery, [newStatus, userId]);
+
+    res.status(200).json({ message: 'Status changed successfully', newStatus });
   } catch (error) {
     console.error('Error occurred:', error);
     res.status(500).json({ error: 'Internal server error' });

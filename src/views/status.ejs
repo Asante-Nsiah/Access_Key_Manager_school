@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key List</title>
+    <link rel="stylesheet" href="/css/adminsPage.css">
+    
+</head>
+<body>
+    <h1>Admin's Page</h1>
+    <% const userData = users; %>
+    <% userData.filter(user => user.email === currentUserEmail).forEach(user => { %>
+      <%= 'Welcome ' + user.email %>
+      <br>
+      <br>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Is Verified</th>
+            <th>Access Keys</th>
+            <th>Status</th>
+            <th>Date of Procurement</th>
+            <th>Expiry Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(user => { %>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.email %></td>
+            <td><%= user.is_verified %></td>
+            <td><%= user.access_keys %></td>
+            <td>
+              <% if (user.status === 'active') { %>
+              <select class="status-dropdown" data-userid="<%= user.id %>">
+                <option value="active" selected>Active</option>
+                <option value="revoked">Revoked</option>
+              </select>
+              <% } else { %>
+              <span><%= user.status %></span>
+              <% } %>
+            </td>
+            <td><%= user.date_of_procurement %></td>
+            <td><%= user.expiry_date %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% }); %>
+    
+	<script  type="text" src="./../status.js"></script>
+</body>
+</html>

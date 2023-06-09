@@ -21,5 +21,7 @@ router.post('/:token', auth.resetActualPasswordPass)
 router.get('/adminsPage', auth.admin)
 router.get('/users', auth.users)
 router.get('/accessKeys', auth.accessKeys)
-router.put('/adminsPage/:users', auth.keyRevoke)
+router.get('/status', auth.getKeyRevoke)
+router.put('/users/:id/status', auth.keyRevoke)
+router.post('/users/:id/status', auth.keyRevoke)
 module.exports = router;
