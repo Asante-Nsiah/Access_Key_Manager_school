@@ -23,7 +23,7 @@ initializePassport(passport);
 
 
 
-app.use(helmet());
+
 app.use(flash())
 app.use(session({
     secret: 'imhotep',
