@@ -14,7 +14,6 @@ const session = require('express-session');
 const validator = require('validator');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-const helmet = require('helmet');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -45,7 +44,9 @@ app.set('views', path.join(__dirname, '/views') );
 app.use(express.static(path.join(__dirname, './../public')));
 
 
-
+app.get('/', (req, res) => {
+    res.send('Hello, World! THIS IS MY FIRST PROJECT');
+  });
 
 
 app.listen(port, () => {
