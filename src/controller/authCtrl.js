@@ -291,45 +291,57 @@ exports.forgetPassword = async (req, res) => {
 };
 
 exports.resetActualPassword = (req, res) => {
-  const { token } = req.query;
-  res.render('reset-actual-password', {token});
+  const { token } = req.params;
 
- 
-};
-exports.resetActualPasswordPass = async (req, res) => {
-  const { token, password, confirmPassword } = req.body;
-console.log(token);
   try {
-    // Check if the token exists in the tokenMap
-    if (!tokenMap.has(token)) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
-    }
-
+    // Retrieve the email associated with the token from the database or cache
     const email = tokenMap.get(token);
 
-    // Check if the passwords match
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
+    if (!email) {
+      return res.status(404).json({ message: 'Invalid or expired reset token' });
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Update the user's password in the database
-    const updateQuery = 'UPDATE users SET password = $1 WHERE email = $2';
-    const updateValues = [hashedPassword, email];
-
-    await pool.query(updateQuery, updateValues);
-
-    // Remove the token from the tokenMap
-    tokenMap.delete(token);
-
-    res.status(200).json({ message: 'Password reset successfully' });
+    // Render the reset-password view and pass the email and token as query parameters
+    res.render('reset-actual-password', { email, token });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ message: 'Internal server error' });
   }
-   
+
+};
+exports.resetActualPasswordPass = async (req, res) => {
+  const { newpassword, confirmpassword, token } = req.body;
+
+try {
+  const email = tokenMap.get(token);
+
+  if (!email) {
+    return res.status(404).json({ message: 'Invalid or expired reset token' });
+  }
+
+  if (newpassword !== confirmpassword) {
+    return res.status(400).json({ message: 'Passwords do not match' });
+  } else {
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+
+    // Update the user's password in the database
+    await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+    console.log('Password reset successfully');
+  }
+
+  // Remove the token from the tokenMap
+  tokenMap.delete(token);
+
+  // Send a success message
+  res.status(200).json({ message: 'Password reset successful' });
+
+ 
+  
+} catch (error) {
+  console.log(error);
+  res.status(500).json({ message: 'Internal server error' });
+}
 };
 
 
