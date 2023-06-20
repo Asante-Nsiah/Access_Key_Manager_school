@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>User Dashboard</title>
-	<link rel="stylesheet" type="text/css" href="/public/css/dasboard.css">
+	<link rel="stylesheet" type="text/css" href="/css/dasboard.css">
 </head>
 <body>
 	
@@ -14,8 +14,6 @@
 			<thead>
 				<tr>
 					<th>ID</th>
-					<th>Email</th>
-					<th>Is Verified</th>
 					<th>Access Keys</th>
 					<th>Status</th>
 					<th>Date of Procurement</th>
@@ -25,8 +23,6 @@
 			<tbody>
 				<tr>
 					<td><%= user.id %></td>
-					<td><%= user.email %></td>
-					<td><%= user.is_verified %></td>
 					<td><%= user.access_keys %></td>
 					<td><%= user.status %></td>
 					<td><%= user.date_of_procurement %></td>

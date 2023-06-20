@@ -1,26 +1,21 @@
-.container {
-	max-width: 800px;
-	margin: 0 auto;
-	padding: 20px;
-	background-color: #f2f2f2;
-}
+.welcome-message {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
 
-h1 {
-	text-align: center;
-}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
 
-.user {
-	margin-bottom: 20px;
-	padding: 20px;
-	border: 1px solid #ccc;
-	background-color: #fff;
-}
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
 
-.user h2 {
-	margin-top: 0;
-}
-
-.user p {
-	margin: 0;
-	padding: 5px 0;
-}
+  th {
+    background-color: #f2f2f2;
+  }

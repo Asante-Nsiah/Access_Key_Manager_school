@@ -2,18 +2,13 @@
 const bcrypt = require('bcrypt');
 const { initialize, authenticate } = require("passport");
 const passport = require('passport');
-const flash = require('express-flash');
-const session = require('express-session');
 const pool = require("./../db");
 const authModel = require("../model/authModel");
 const validator = require('validator');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-const req = require('express/lib/request');
-const { render } = require('ejs');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
-const helmet = require('./../app.js');
 const { v4: uuidv4 } = require('uuid');
 
 
@@ -170,6 +165,10 @@ exports.loginPass = (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    if (!user.is_verified) {
+      return res.status(401).json({ message: 'Email not verified' });
     }
 
     req.session.user = {

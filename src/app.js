@@ -3,20 +3,14 @@ require('dotenv').config();
 
 const express = require('express');
 const routes = require('./route/routing');
-const ejs = require('ejs');
 const { dirname } = require('path');
-const path = require('path')
-const pool = require('./db');
-const bcrypt = require('bcrypt');
+const path = require('path');
 const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
-const validator = require('validator');
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const app = express();
 const port = process.env.PORT || 3000;
 
+const app = express();
 
 const initializePassport = require('./controller/passport-config');
 initializePassport(passport);
