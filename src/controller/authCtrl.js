@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const { v4: uuidv4 } = require('uuid');
-
+const { v4: generateUUID } = require('uuid');
 
 
 exports.signup = (req, res) => {
@@ -155,9 +155,11 @@ exports.verify = async (req, res) => {
 exports.login = async (req, res) => {
   res.render("login");
 
-}
+};
+
+
 exports.loginPass = (req, res, next) => {
-  const authenticatedUser = passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', (err, user, info) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ message: 'Internal server error' });
@@ -171,25 +173,77 @@ exports.loginPass = (req, res, next) => {
       return res.status(401).json({ message: 'Email not verified' });
     }
 
+    const sessionId = uuidv4(); // Generate a new session ID using uuidv4
+
     req.session.user = {
       email: user.email,
+      sessionId: sessionId, // Include the generated session ID in the session object
     };
 
-    // Check if the email matches the admin email
-    if (user.email === 'demoproject369@gmail.com') {
-      // Redirect to the admin page
-      return res.redirect('/adminsPage');
-    }
+    pool.query('SELECT * FROM users', (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
 
-    // Redirect to the dashboard
-    return res.redirect('/dashboard');
+      const users = result.rows; // Assuming the user data is stored in a table called 'users'
+
+      if (user.email === 'demoproject369@gmail.com') {
+        // Render the adminsPage template and pass the 'users' variable
+        res.render('adminsPage', { users: users , currentUserEmail: user.email});
+      } else {
+        // Render the dashboard template and pass the 'users' and 'currentUserEmail' variables
+        res.render('dashboard', { users: users, currentUserEmail: user.email });
+      }
+    });
   })(req, res, next);
 };
+
+
+
 // exports.loginPass = (passport.authenticate('local', {
 //   successRedirect: '/dashboard',
 //   failureRedirect: '/login',
 //   failureFlash: true,
 // }))
+
+exports.checkSession = (req, res, next) => {
+  if (req.session.user && req.session.user.sessionId) {
+    // Check if the stored session identifier matches the current session identifier
+    if (req.session.user.sessionId !== req.session.id) {
+      // If the session identifiers do not match, it means the user has logged in from a different browser or device.
+      // In this case, log them out and redirect to the login page.
+      delete req.session.user.sessionId;
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Error destroying session:', err);
+          return res.status(500).send('Internal Server Error');
+        }
+        res.redirect('/login');
+      });
+    } else {
+      // Session identifier matches, determine the user's role and redirect accordingly
+      const { email } = req.session.user;
+
+      // Check if the email matches the admin email
+      if (email === 'demoproject369@gmail.com') {
+        // Store the retrieved session information in req.session.user
+        req.session.user = { email, sessionId: req.session.id };
+        // Redirect to the admin page
+        return res.redirect('/adminsPage');
+      } else {
+        // Store the retrieved session information in req.session.user
+        req.session.user = { email, sessionId: req.session.id };
+        // Redirect to the dashboard
+        return res.redirect('/dashboard');
+      }
+    }
+  } else {
+    // No session identifier found, user is not logged in
+    res.redirect('/login'); // Redirect the user to the login page
+  }
+};
+
 
 exports.dashboard = async (req, res) => {
   
@@ -449,4 +503,17 @@ exports.keyRevoke = async (req, res) => {
   }
 }; 
 
+
+exports.logout = (req, res) => {
+  if (req.session.user) {
+    delete req.session.user.sessionId;
+  }
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+    res.redirect('/login'); // Redirect the user to the login page
+  });
+};
 
